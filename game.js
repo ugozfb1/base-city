@@ -1,5 +1,10 @@
-import { sdk } from 'https://esm.sh/@farcaster/frame-sdk';
-sdk.actions.ready();
+// Farcaster SDK - hata olursa oyun yine çalışsın
+try {
+    const { sdk } = await import('https://esm.sh/@farcaster/frame-sdk');
+    sdk.actions.ready();
+} catch (e) {
+    console.log('Farcaster SDK yüklenemedi, oyun devam ediyor...');
+}
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -68,19 +73,15 @@ class Tank {
         ctx.save();
         ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
         
-        // Yön rotasyonu
         const rotations = { up: 0, right: Math.PI / 2, down: Math.PI, left: -Math.PI / 2 };
         ctx.rotate(rotations[this.direction]);
         
-        // Tank gövdesi
         ctx.fillStyle = this.isPlayer ? '#0a0' : '#a00';
         ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
         
-        // Tank namlu
         ctx.fillStyle = this.isPlayer ? '#0f0' : '#f00';
         ctx.fillRect(-2, -this.height / 2 - 6, 4, 10);
         
-        // Paletler
         ctx.fillStyle = '#333';
         ctx.fillRect(-this.width / 2, -this.height / 2, 3, this.height);
         ctx.fillRect(this.width / 2 - 3, -this.height / 2, 3, this.height);
@@ -101,11 +102,9 @@ class Tank {
             case 'right': this.x += this.speed; break;
         }
         
-        // Sınır kontrolü
         this.x = Math.max(0, Math.min(canvas.width - this.width, this.x));
         this.y = Math.max(0, Math.min(canvas.height - this.height, this.y));
         
-        // Duvar çarpışma kontrolü
         if (this.checkWallCollision() || this.checkTankCollision()) {
             this.x = oldX;
             this.y = oldY;
@@ -118,7 +117,6 @@ class Tank {
                 if (this.collidesWith(wall)) return true;
             }
         }
-        // Üs kontrolü
         if (base && this.collidesWith(base)) return true;
         return false;
     }
@@ -150,7 +148,6 @@ class Tank {
     }
 }
 
-// Mermi sınıfı
 class Bullet {
     constructor(x, y, direction, isFromPlayer) {
         this.x = x;
@@ -171,7 +168,6 @@ class Bullet {
             case 'right': this.x += this.speed; break;
         }
         
-        // Ekran dışı kontrolü
         if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
             this.active = false;
         }
@@ -190,7 +186,6 @@ class Bullet {
     }
 }
 
-// Duvar sınıfı
 class Wall {
     constructor(x, y, type) {
         this.x = x;
@@ -208,7 +203,6 @@ class Wall {
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.strokeStyle = '#631';
                 ctx.lineWidth = 1;
-                // Tuğla deseni
                 for (let i = 0; i < 2; i++) {
                     for (let j = 0; j < 2; j++) {
                         ctx.strokeRect(this.x + j * 10, this.y + i * 10, 10, 10);
@@ -237,7 +231,6 @@ class Wall {
     }
 }
 
-// Üs sınıfı
 class Base {
     constructor(x, y) {
         this.x = x;
@@ -248,11 +241,7 @@ class Base {
     }
 
     draw() {
-        if (this.destroyed) {
-            ctx.fillStyle = '#400';
-        } else {
-            ctx.fillStyle = '#00f';
-        }
+        ctx.fillStyle = this.destroyed ? '#400' : '#00f';
         ctx.fillRect(this.x, this.y, this.width, this.height);
         
         if (!this.destroyed) {
@@ -264,7 +253,6 @@ class Base {
     }
 }
 
-// Haritayı oluştur
 function createMap() {
     walls = [];
     base = null;
@@ -284,7 +272,6 @@ function createMap() {
     }
 }
 
-// Düşman spawn
 function spawnEnemies() {
     const spawnPoints = [
         { x: 0, y: 0 },
@@ -301,10 +288,8 @@ function spawnEnemies() {
     }
 }
 
-// Düşman AI
 function updateEnemies() {
     for (let enemy of enemies) {
-        // Rastgele hareket
         if (Math.random() < 0.02) {
             const dirs = ['up', 'down', 'left', 'right'];
             enemy.direction = dirs[Math.floor(Math.random() * dirs.length)];
@@ -312,19 +297,16 @@ function updateEnemies() {
         
         enemy.move(enemy.direction);
         
-        // Rastgele ateş
         if (Math.random() < 0.02) {
             enemy.shoot();
         }
     }
 }
 
-// Çarpışma kontrolleri
 function checkCollisions() {
     for (let bullet of bullets) {
         if (!bullet.active) continue;
         
-        // Duvar çarpışması
         for (let i = walls.length - 1; i >= 0; i--) {
             const wall = walls[i];
             if (wall.type === BLOCK_TYPES.WATER) continue;
@@ -341,7 +323,6 @@ function checkCollisions() {
             }
         }
         
-        // Üs çarpışması
         if (base && !base.destroyed && bullet.collidesWith(base)) {
             bullet.active = false;
             base.destroyed = true;
@@ -349,7 +330,6 @@ function checkCollisions() {
             return;
         }
         
-        // Oyuncu mermisi - düşman çarpışması
         if (bullet.isFromPlayer) {
             for (let i = enemies.length - 1; i >= 0; i--) {
                 if (bullet.collidesWith(enemies[i])) {
@@ -361,7 +341,6 @@ function checkCollisions() {
                 }
             }
         } else {
-            // Düşman mermisi - oyuncu çarpışması
             if (player && bullet.collidesWith(player)) {
                 bullet.active = false;
                 lives--;
@@ -371,7 +350,6 @@ function checkCollisions() {
                     gameOver();
                     return;
                 } else {
-                    // Oyuncuyu başlangıç noktasına geri getir
                     player.x = Math.floor(MAP_WIDTH / 2) * TILE_SIZE - 8;
                     player.y = (MAP_HEIGHT - 2) * TILE_SIZE;
                 }
@@ -379,10 +357,8 @@ function checkCollisions() {
         }
     }
     
-    // Aktif olmayan mermileri temizle
     bullets = bullets.filter(b => b.active);
     
-    // Dalga kontrolü
     if (enemies.length === 0) {
         wave++;
         updateHUD();
@@ -390,58 +366,46 @@ function checkCollisions() {
     }
 }
 
-// HUD güncelle
 function updateHUD() {
     document.getElementById('score').textContent = `SKOR: ${score}`;
     document.getElementById('wave').textContent = `DALGA: ${wave}`;
     document.getElementById('lives').textContent = `❤️ ${lives}`;
 }
 
-// Oyun bitti
 function gameOver() {
     gameRunning = false;
     document.getElementById('final-score').textContent = `SKOR: ${score}`;
     document.getElementById('game-over').classList.remove('hidden');
 }
 
-// Ana oyun döngüsü
 function gameLoop() {
     if (!gameRunning) return;
     
-    // Temizle
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Duvarları çiz
     for (let wall of walls) {
         wall.draw();
     }
     
-    // Üssü çiz
     if (base) base.draw();
-    
-    // Oyuncuyu çiz
     if (player) player.draw();
     
-    // Düşmanları güncelle ve çiz
     updateEnemies();
     for (let enemy of enemies) {
         enemy.draw();
     }
     
-    // Mermileri güncelle ve çiz
     for (let bullet of bullets) {
         bullet.update();
         bullet.draw();
     }
     
-    // Çarpışmaları kontrol et
     checkCollisions();
     
     requestAnimationFrame(gameLoop);
 }
 
-// Oyunu başlat
 function startGame() {
     score = 0;
     wave = 1;
@@ -451,7 +415,6 @@ function startGame() {
     
     createMap();
     
-    // Oyuncuyu oluştur
     player = new Tank(
         Math.floor(MAP_WIDTH / 2) * TILE_SIZE - 8,
         (MAP_HEIGHT - 2) * TILE_SIZE,
@@ -469,10 +432,9 @@ function startGame() {
     gameLoop();
 }
 
-// Kontroller
+// Klavye kontrolleri
 let keys = {};
 
-// Klavye kontrolleri
 document.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
@@ -484,14 +446,13 @@ document.addEventListener('keyup', (e) => {
     keys[e.key] = false;
 });
 
-// Klavye girişi işle
 setInterval(() => {
     if (!gameRunning || !player) return;
     
-    if (keys['ArrowUp'] || keys['w']) player.move('up');
-    if (keys['ArrowDown'] || keys['s']) player.move('down');
-    if (keys['ArrowLeft'] || keys['a']) player.move('left');
-    if (keys['ArrowRight'] || keys['d']) player.move('right');
+    if (keys['ArrowUp'] || keys['w'] || keys['W']) player.move('up');
+    if (keys['ArrowDown'] || keys['s'] || keys['S']) player.move('down');
+    if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.move('left');
+    if (keys['ArrowRight'] || keys['d'] || keys['D']) player.move('right');
     if (keys[' ']) player.shoot();
 }, 16);
 
@@ -506,21 +467,31 @@ function setupTouchControls() {
     
     for (let [id, dir] of Object.entries(buttons)) {
         const btn = document.getElementById(id);
-        let interval;
+        if (!btn) continue;
+        
+        let interval = null;
         
         const start = (e) => {
             e.preventDefault();
+            e.stopPropagation();
             if (player && gameRunning) player.move(dir);
+            if (interval) clearInterval(interval);
             interval = setInterval(() => {
                 if (player && gameRunning) player.move(dir);
             }, 50);
         };
         
-        const end = () => clearInterval(interval);
+        const end = (e) => {
+            e.preventDefault();
+            if (interval) {
+                clearInterval(interval);
+                interval = null;
+            }
+        };
         
-        btn.addEventListener('touchstart', start);
-        btn.addEventListener('touchend', end);
-        btn.addEventListener('touchcancel', end);
+        btn.addEventListener('touchstart', start, { passive: false });
+        btn.addEventListener('touchend', end, { passive: false });
+        btn.addEventListener('touchcancel', end, { passive: false });
         btn.addEventListener('mousedown', start);
         btn.addEventListener('mouseup', end);
         btn.addEventListener('mouseleave', end);
@@ -528,23 +499,23 @@ function setupTouchControls() {
     
     // Ateş butonu
     const fireBtn = document.getElementById('fire');
-    fireBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (player && gameRunning) player.shoot();
-    });
-    fireBtn.addEventListener('mousedown', () => {
-        if (player && gameRunning) player.shoot();
-    });
+    if (fireBtn) {
+        fireBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (player && gameRunning) player.shoot();
+        }, { passive: false });
+        
+        fireBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (player && gameRunning) player.shoot();
+        });
+    }
 }
 
-// Başlat ve yeniden başlat butonları
+// Başlat butonları
 document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('restart-btn').addEventListener('click', startGame);
 
 // Sayfa yüklendiğinde
-window.addEventListener('load', () => {
-    setupTouchControls();
-});
-
-
-
+setupTouchControls();
