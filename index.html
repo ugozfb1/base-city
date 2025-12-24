@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="fc:frame" content="vNext">
+    <meta name="base:app_id" content="[SONRA EKLENECEK]">
+    <title>Tank Battle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="hud">
+            <span id="score">SKOR: 0</span>
+            <span id="wave">DALGA: 1</span>
+            <span id="lives">❤️ 3</span>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="controls">
+            <div id="dpad">
+                <button id="up" class="dpad-btn">▲</button>
+                <div class="dpad-row">
+                    <button id="left" class="dpad-btn">◄</button>
+                    <button id="down" class="dpad-btn">▼</button>
+                    <button id="right" class="dpad-btn">►</button>
+                </div>
+            </div>
+            <button id="fire" class="fire-btn">🔥</button>
+        </div>
+        <div id="start-screen">
+            <h1>TANK BATTLE</h1>
+            <p>Üssünü koru, düşmanları yok et!</p>
+            <button id="start-btn">BAŞLA</button>
+        </div>
+        <div id="game-over" class="hidden">
+            <h1>OYUN BİTTİ</h1>
+            <p id="final-score">SKOR: 0</p>
+            <button id="restart-btn">YENİDEN BAŞLA</button>
+        </div>
+    </div>
+    <script type="module" src="game.js"></script>
+</body>
+</html>
+
+
+

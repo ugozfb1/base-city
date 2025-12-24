@@ -1,0 +1,29 @@
+{
+  "accountAssociation": {
+    "header": "[FARCASTER'DAN ALINACAK]",
+    "payload": "[FARCASTER'DAN ALINACAK]",
+    "signature": "[FARCASTER'DAN ALINACAK]"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Tank Battle",
+    "subtitle": "Klasik tank savaşı oyunu",
+    "description": "Battle City'den esinlenen, yukarıdan görünüşlü 2D tank oyunu. Düşman tanklarını yok et ve üssünü koru!",
+    "iconUrl": "https://[DOMAIN]/icon.png",
+    "homeUrl": "https://[DOMAIN]",
+    "imageUrl": "https://[DOMAIN]/preview.png",
+    "splashImageUrl": "https://[DOMAIN]/icon.png",
+    "splashBackgroundColor": "#000000",
+    "primaryCategory": "games",
+    "tags": ["game", "arcade", "farcaster"],
+    "tagline": "Üssünü koru, tankları yok et!",
+    "heroImageUrl": "https://[DOMAIN]/preview.png",
+    "screenshotUrls": ["https://[DOMAIN]/preview.png"],
+    "ogTitle": "Tank Battle - Klasik Tank Savaşı",
+    "ogDescription": "Battle City'den esinlenen 2D tank oyunu. Üssünü koru ve tüm düşmanları yok et!",
+    "ogImageUrl": "https://[DOMAIN]/preview.png"
+  }
+}
+
+
+
